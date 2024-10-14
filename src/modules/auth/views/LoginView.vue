@@ -1,10 +1,22 @@
 <script setup>
+import { onMounted } from 'vue';
 import { useRegister } from '../composables/useRegister';
+import { CAPTCHA_SITE_KEY } from '@/utils/config';
+
+onMounted(() => {
+  window.grecaptcha.render('recaptcha', {
+    sitekey: CAPTCHA_SITE_KEY,
+    'expired-callback': () => {
+      console.log('Expirado');
+    },
+  });
+});
 
 const {
   // Properties
   v$Login,
   loginData,
+  isCaptchaVerified,
   isPasswordVisible,
   isLoading,
 
@@ -55,6 +67,11 @@ const {
           {{ error.$message }}
         </p>
       </span>
+    </div>
+    <!-- reCAPTCHA widget -->
+    <div class="recaptcha">
+      <div class="recaptcha" id="recaptcha"></div>
+      <p v-if="!isCaptchaVerified" class="text-error">Por favor, verifica que no eres un robot.</p>
     </div>
     <button class="btn btn-primary">
       <span v-if="!isLoading">Iniciar sesión</span>

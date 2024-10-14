@@ -180,3 +180,12 @@ body {
 .toggle-btn:hover {
   color: #363939;
 }
+
+.recaptcha {
+  display: grid;
+  place-items: center;
+}
+
+.recaptcha--error {
+  border: 1px solid red;
+}

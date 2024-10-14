@@ -8,6 +8,7 @@ const {
   checks,
   isPasswordVisible,
   isLoading,
+  passwordStatus,
   v$,
 
   // Methods
@@ -78,20 +79,23 @@ const {
           :type="isPasswordVisible ? 'text' : 'password'"
           placeholder="**********"
           class="form-control"
-          :class="{ 'form-control--error': v$.password.$error }"
-          @input="checkPasswordStrength"
-          @blur.prevent="checkPassword"
-          id="password"
+          :class="{ 'form-control--error': v$.password.$error || passwordStatus }"
           v-model="formRegister.password"
+          @input="checkPasswordStrength"
+          @blur="checkPassword"
+          id="password"
         />
         <button type="button" @click="togglePasswordVisibility" class="toggle-btn">
           {{ isPasswordVisible ? 'Ocultar' : 'Mostrar' }}
         </button>
       </div>
+      <span v-if="passwordStatus.length">
+        <p class="text-error">{{ passwordStatus }}</p>
+      </span>
       <span v-if="v$.password.$error">
-        <p v-for="error of v$.password.$errors" :key="error.$uid" class="text-error">
+        <li v-for="error of v$.password.$errors" :key="error.$uid" class="text-error">
           {{ error.$message }}
-        </p>
+        </li>
       </span>
       <div class="strength-meter">
         <div class="strength-meter-fill" :style="{ width: strengthPercent + '%' }"></div>

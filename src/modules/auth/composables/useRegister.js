@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { reactive, ref, computed } from 'vue';
 
 import useVuelidate from '@vuelidate/core';
@@ -8,6 +9,7 @@ import 'vue-toast-notification/dist/theme-sugar.css';
 
 import olympusAPI from '@/api/olympusAPI';
 import router from '@/router';
+// import { CAPTCHA_SITE_KEY } from '@/utils/config';
 
 export const useRegister = () => {
   // Helpers
@@ -16,15 +18,61 @@ export const useRegister = () => {
   );
 
   const alphaWithSpaces = helpers.regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/);
+  const isPasswordWeak = (password) => !weakPasswords.includes(password);
 
   // Properties
   const isLoading = ref(false);
   const isPasswordVisible = ref(false);
-
   const passwordStatus = ref('');
-
-  // Variables para el medidor y las validaciones
   const strengthPercent = ref(0);
+  const isCaptchaVerified = ref(true);
+
+  // const captchaToken = ref('');
+
+  const weakPasswords = [
+    '123456',
+    '123456789',
+    'qwerty',
+    'password',
+    '12345',
+    '12345678',
+    '111111',
+    '123123',
+    'abc123',
+    'password1',
+    '1234',
+    '000000',
+    'iloveyou',
+    '123',
+    'monkey',
+    'dragon',
+    'letmein',
+    'princess',
+    'qwertyuiop',
+    'admin',
+    'welcome',
+    'login',
+    'passw0rd',
+    '1q2w3e4r',
+    'starwars',
+    'football',
+    '123qwe',
+    '1qaz2wsx',
+    'sunshine',
+    '666666',
+    '654321',
+    'superman',
+    'asdfghjkl',
+    'qazwsx',
+    'michael',
+    'hunter',
+    'trustno1',
+    'freedom',
+    'whatever',
+    'letmein123',
+    'batman123@uthhA',
+    'jordan23',
+  ];
 
   const checks = ref({
     lowercaseUppercase: false,
@@ -66,6 +114,7 @@ export const useRegister = () => {
       $autoDirty: true,
       required: helpers.withMessage('Este campo es obligatorio', required),
       passwordRegex: helpers.withMessage('No cumple con los requisitos mínimos', passwordRegex),
+      isPasswordWeak: helpers.withMessage('Contraseña altamente débil.', isPasswordWeak),
     },
     confirmPassword: {
       $autoDirty: true,
@@ -114,7 +163,8 @@ export const useRegister = () => {
   };
 
   const checkPassword = async () => {
-    if (!formRegister.password) return;
+    if (!formRegister.password || formRegister.password.length < 12 || v$.value.password.$error)
+      return;
 
     try {
       const response = await olympusAPI.post('/check-pswd', {
@@ -123,13 +173,11 @@ export const useRegister = () => {
 
       const isUnsafePassword = response.data === 'Comprometida';
 
-      if (!isUnsafePassword) return (passwordStatus.value = '');
+      passwordStatus.value = !isUnsafePassword
+        ? ''
+        : 'Contraseña comprometida, por favor utiliza otra.';
 
-      v$.value.password.$errors[0].$message += 'Hola munod';
-
-      // passwordStatus.value = !isUnsafePassword
-      // ? ''
-      // : 'Contraseña comprometida, por favor utiliza otra.';
+      console.log(passwordStatus.value);
     } catch (error) {
       console.error('Error verificando la contraseña:', error);
       passwordStatus.value = 'Error verificando la contraseña';
@@ -142,12 +190,18 @@ export const useRegister = () => {
     const isInvalidForm = v$Login.value.$invalid;
     if (isInvalidForm) return;
 
-    isLoading.value = true;
+    const tokenCaptcha = await grecaptcha.getResponse();
+
+    if (!tokenCaptcha) return (isCaptchaVerified.value = false);
 
     try {
+      isLoading.value = true;
+      isCaptchaVerified.value = true;
+
       const { data } = await olympusAPI.post('/login', {
         email: loginData.email,
         password: loginData.password,
+        tokenCaptcha,
       });
 
       isLoading.value = false;
@@ -165,6 +219,8 @@ export const useRegister = () => {
       });
     } catch (error) {
       isLoading.value = false;
+      grecaptcha.reset();
+
       const errorMessage = error.response.data.message;
 
       $toast.open({
@@ -238,6 +294,8 @@ export const useRegister = () => {
     checks,
     isPasswordVisible,
     isLoading,
+    isCaptchaVerified,
+    passwordStatus,
     v$,
     v$Login,
 
