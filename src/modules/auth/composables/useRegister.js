@@ -27,6 +27,9 @@ export const useRegister = () => {
   const strengthPercent = ref(0);
   const isCaptchaVerified = ref(true);
 
+  const isLocked = ref(false);
+  const timeRemaining = ref(0);
+
   // const captchaToken = ref('');
 
   const weakPasswords = [
@@ -87,11 +90,11 @@ export const useRegister = () => {
   });
 
   const formRegister = reactive({
-    name: '',
-    phone: '',
-    emailR: '',
-    password: '',
-    confirmPassword: '',
+    name: 'Diego Vite',
+    phone: '7713400653',
+    emailR: 'jekofel661@rowplant.com',
+    password: 'Masterv123@1',
+    confirmPassword: 'Masterv123@1',
   });
 
   const registerRules = {
@@ -176,12 +179,30 @@ export const useRegister = () => {
       passwordStatus.value = !isUnsafePassword
         ? ''
         : 'Contraseña comprometida, por favor utiliza otra.';
-
-      console.log(passwordStatus.value);
     } catch (error) {
       console.error('Error verificando la contraseña:', error);
       passwordStatus.value = 'Error verificando la contraseña';
     }
+  };
+
+  // Computed para formatear el tiempo en "mm:ss"
+  const formattedTime = computed(() => {
+    const totalSeconds = Math.floor(timeRemaining.value);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+  });
+
+  // Función para iniciar el contador
+  const startCountdown = () => {
+    const interval = setInterval(() => {
+      if (timeRemaining.value > 0) {
+        timeRemaining.value--;
+      } else {
+        clearInterval(interval);
+        isLocked.value = false; // Desbloquear después de que el tiempo expire
+      }
+    }, 1000);
   };
 
   const onLogin = async () => {
@@ -191,7 +212,6 @@ export const useRegister = () => {
     if (isInvalidForm) return;
 
     const tokenCaptcha = await grecaptcha.getResponse();
-
     if (!tokenCaptcha) return (isCaptchaVerified.value = false);
 
     try {
@@ -223,10 +243,17 @@ export const useRegister = () => {
 
       const errorMessage = error.response.data.message;
 
+      // Solucionar bug: contador rápido después de 2 clic
+      if (error.response.status === 403 && !isLocked.value) {
+        timeRemaining.value = error.response.data.timeRemaining;
+        startCountdown();
+        isLocked.value = true;
+      }
+
       $toast.open({
         message: `${errorMessage}`,
         type: 'error',
-        duration: 6000,
+        duration: 4000,
         pauseOnHover: true,
         queue: true,
       });
@@ -296,8 +323,12 @@ export const useRegister = () => {
     isLoading,
     isCaptchaVerified,
     passwordStatus,
+    isLocked,
     v$,
     v$Login,
+
+    // readonly
+    formattedTime,
 
     // Methods
     togglePasswordVisibility,

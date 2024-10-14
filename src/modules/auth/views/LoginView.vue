@@ -3,6 +3,7 @@ import { onMounted } from 'vue';
 import { useRegister } from '../composables/useRegister';
 import { CAPTCHA_SITE_KEY } from '@/utils/config';
 
+// Lifecycle
 onMounted(() => {
   window.grecaptcha.render('recaptcha', {
     sitekey: CAPTCHA_SITE_KEY,
@@ -12,6 +13,7 @@ onMounted(() => {
   });
 });
 
+// Composables
 const {
   // Properties
   v$Login,
@@ -19,6 +21,8 @@ const {
   isCaptchaVerified,
   isPasswordVisible,
   isLoading,
+  isLocked,
+  formattedTime,
 
   // Methods
   togglePasswordVisibility,
@@ -26,6 +30,8 @@ const {
 } = useRegister();
 
 // Methods
+
+// Variable reactiva que almacena el tiempo restante en segundos (3 minutos y 30 segundos = 210 segundos)
 </script>
 
 <template>
@@ -67,6 +73,12 @@ const {
           {{ error.$message }}
         </p>
       </span>
+    </div>
+    <div v-if="isLocked">
+      <p class="text-center text-error">
+        Cuenta bloqueada temporalmente. <br />
+        Tiempo restante: {{ formattedTime }}
+      </p>
     </div>
     <!-- reCAPTCHA widget -->
     <div class="recaptcha">

@@ -48,6 +48,11 @@ const router = createRouter({
           name: 'registro',
           component: () => import('@/modules/auth/views/RegisterView.vue'),
         },
+        {
+          path: 'mfa',
+          name: 'mfa',
+          component: () => import('@/modules/auth/views/MFAView.vue'),
+        },
       ],
     },
     {
