@@ -1,78 +1,17 @@
-import isAuthenticatedGuard from '@/modules/auth/guards/is-authenticated.guard';
-import { createRouter, createWebHistory } from 'vue-router';
+import { authRoutes } from '@/modules/auth/router';
+import { landingRoutes } from '@/modules/landing/routes';
+import { createRouter, createWebHashHistory } from 'vue-router';
+import { profileRoutes } from '@/modules/user/routes';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
+    landingRoutes,
+    authRoutes,
+    profileRoutes,
     {
-      path: '/',
-      name: 'landing',
+      path: '/:pathMatch(.*)*', // Catch-all: Coincide con cualquier ruta no definida
       redirect: { name: 'inicio' },
-      component: () => import('@/modules/landing/layouts/LandingPageLayout.vue'),
-      children: [
-        {
-          path: '',
-          name: 'inicio',
-          component: () => import('@/modules/landing/views/HomeView.vue'),
-        },
-        {
-          path: 'productos',
-          name: 'productos',
-          component: () => import('@/modules/landing/views/ProductsView.vue'),
-        },
-        {
-          path: 'acerca',
-          name: 'acerca-de',
-          component: () => import('@/modules/landing/views/AboutView.vue'),
-        },
-        {
-          path: 'contacto',
-          name: 'contacto',
-          component: () => import('@/modules/landing/views/ContactView.vue'),
-        },
-      ],
-    },
-    {
-      path: '/auth',
-      name: 'auth',
-      redirect: { name: 'inicio-sesion' },
-      component: () => import('@/modules/auth/layouts/AuthPageLayout.vue'),
-      children: [
-        {
-          path: 'inicio-sesion',
-          name: 'inicio-sesion',
-          component: () => import('@/modules/auth/views/LoginView.vue'),
-        },
-        {
-          path: 'registro',
-          name: 'registro',
-          component: () => import('@/modules/auth/views/RegisterView.vue'),
-        },
-        {
-          path: 'mfa',
-          name: 'mfa',
-          component: () => import('@/modules/auth/views/MFAView.vue'),
-        },
-      ],
-    },
-    {
-      path: '/admin',
-      name: 'admin',
-      beforeEnter: isAuthenticatedGuard,
-      redirect: { name: 'gestion-productos' },
-      component: () => import('@/modules/protected/layouts/AdminPageLayout.vue'),
-      children: [
-        {
-          path: 'gestion-productos',
-          name: 'gestion-productos',
-          component: () => import('@/modules/protected/views/AdminView.vue'),
-        },
-        {
-          path: 'gestion-usuarios',
-          name: 'gestion-usuarios',
-          component: () => import('@/modules/protected/views/GesUsersView.vue'),
-        },
-      ],
     },
   ],
 });

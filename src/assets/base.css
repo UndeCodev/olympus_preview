@@ -14,6 +14,7 @@ html {
 }
 
 body {
+  box-sizing: border-box;
   font-size: 16px;
 }
 
@@ -24,6 +25,11 @@ body {
   gap: 1.6rem;
 }
 
+.form-group {
+  display: grid;
+  gap: 8px;
+}
+
 /* Inputs */
 .form-control {
   border: 2px solid #e1e4e7;
@@ -31,14 +37,19 @@ body {
   height: 4.8rem;
   padding-inline: 1.2rem;
   border-radius: 4px;
+  transition: ease 0.4s;
 }
 
 .form-control:hover {
-  box-shadow: 0 0 1px #6eaceb;
+  box-shadow: 0 0 2px #6eaceb;
 }
 
 .form-control--error {
   border-color: #ed4258;
+}
+
+.form-control--error:focus {
+  outline: 2px solid red;
 }
 
 /* Buttons */
@@ -46,16 +57,35 @@ body {
   padding: 1.2rem;
   font-weight: 500;
   border-radius: 3px;
+  display: grid;
+  grid-auto-flow: column;
+  place-items: center;
+  column-gap: 6px;
 }
 
-.btn-primary {
+.btn-primary,
+.btn-primary--disabled {
   background-color: #363939;
   color: white;
   transition: ease 0.2s;
 }
 
+.btn-primary--disabled {
+  opacity: 50%;
+  cursor: not-allowed;
+}
+
 .btn-primary:hover {
   background-color: #363939ec;
+}
+
+.btn-outline {
+  background-color: white;
+  transition: ease 0.3s;
+}
+
+.btn-outline:hover {
+  background-color: #eaeaea;
 }
 
 /* Text */
@@ -70,6 +100,11 @@ body {
 
 .text-error {
   color: #ed4258;
+}
+
+/* Label */
+label {
+  font-weight: 500;
 }
 
 /* Spinner */
@@ -95,6 +130,10 @@ body {
   background-color: #fff;
   border-radius: 100%;
   animation: sk-chase-dot-before 2s infinite ease-in-out both;
+}
+
+.sk-chase-dot--black:before {
+  background-color: #2a2a2a;
 }
 
 .sk-chase-dot:nth-child(1) {
@@ -168,6 +207,7 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
+  width: 5rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -175,6 +215,8 @@ body {
   font-size: 1.4rem;
   color: #57595a;
   transition: ease 0.3s;
+  display: grid;
+  place-content: center;
 }
 
 .toggle-btn:hover {
@@ -188,4 +230,109 @@ body {
 
 .recaptcha--error {
   border: 1px solid red;
+}
+
+.btn-profile {
+  background-color: #f6f6f6;
+  font-weight: 400;
+  color: #1f2223;
+
+  font-weight: 500;
+  padding: 1.2rem 1.6rem;
+  border-radius: 2px;
+  display: grid;
+  place-items: start;
+}
+
+/* Estilos para el medidor */
+.strength-meter {
+  height: 10px;
+  background-color: #eee;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  background-color: #10ad64; /* Cambia el color para la fuerza */
+  border-radius: 5px;
+  transition: width 0.3s;
+}
+
+/* Estilos para los mensajes de validación */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  color: gray;
+}
+
+.passed {
+  color: #038247;
+  font-weight: bold;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 6rem;
+  height: 3.4rem;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 2.5rem;
+  width: 2.5rem;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(2rem);
+  -ms-transform: translateX(2rem);
+  transform: translateX(2rem);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }

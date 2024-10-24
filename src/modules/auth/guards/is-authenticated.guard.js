@@ -1,12 +1,11 @@
-const isAuthenticatedGuard = (to, from, next) => {
-  const token = localStorage.getItem('token');
-  const lastPath = localStorage.setItem('last-path', to.path);
+import { useAuthStore } from '../store/useAuthStore';
 
-  if (!token) {
-    return next({ name: 'inicio-sesion' });
-  }
+const isAuthenticatedGuard = async (to, from, next) => {
+  const authStore = useAuthStore();
 
-  next(lastPath);
+  await authStore.checkAuthStatus();
+
+  authStore.authStatus === authStore.AuthStatus.UnAuthenticated ? next({ name: 'inicio' }) : next();
 };
 
 export default isAuthenticatedGuard;
