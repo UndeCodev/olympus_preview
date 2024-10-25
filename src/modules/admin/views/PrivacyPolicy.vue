@@ -468,14 +468,13 @@ const deletePrivacyPolicy = async (policyId) => {
 };
 
 const createPrivacyPolicy = async (policyData) => {
+  const { title, content, effectiveDate } = policyData;
+
+  if (!title || !content || !effectiveDate) {
+    throw new Error('Todos los campos son obligatorios.');
+  }
+
   try {
-    const { title, content, effectiveDate } = policyData;
-
-    // Validar que todos los campos necesarios estén presentes
-    if (!title || !content || !effectiveDate) {
-      throw new Error('Todos los campos son obligatorios.');
-    }
-
     // Hacer la solicitud al backend para crear la nueva política de privacidad
     const { data } = await olympusAPI.post('/dr/privacy-policy', {
       title,
@@ -485,8 +484,7 @@ const createPrivacyPolicy = async (policyData) => {
 
     return data;
   } catch (error) {
-    console.error('Error al crear la política de privacidad:', error.message);
-    throw error; // Lanzar el error para que sea manejado en el componente llamante
+    return error;
   }
 };
 
@@ -496,7 +494,6 @@ const handleCreatePolicy = async () => {
   if (v$.value.$invalid) return;
 
   try {
-    closeModal();
     isLoading.value = true;
 
     const newPolicyData = {
@@ -516,7 +513,10 @@ const handleCreatePolicy = async () => {
       duration: 4000,
       pauseOnHover: true,
     });
+
+    closeModal();
   } catch (error) {
+    console.log(error);
     isLoading.value = false;
     const errorMessage = error.response.data.message;
 
@@ -633,7 +633,14 @@ const fetchPrivacyPolicies = async () => {
     isLoadingData.value = false;
   } catch (error) {
     isLoadingData.value = false;
-    console.error('Error al obtener las políticas de privacidad:', error);
+    const errorMessage = error.response.data.message;
+
+    $toast.open({
+      message: errorMessage,
+      type: 'error',
+      duration: 4000,
+      pauseOnHover: true,
+    });
   }
 };
 

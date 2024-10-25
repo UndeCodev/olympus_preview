@@ -8,7 +8,7 @@
 
     <!-- Sidebar -->
     <aside
-      class="fixed inset-y-0 left-0 z-30 transform bg-white transition duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 grid place-content-start gap-10 p-8 sidebar"
+      class="fixed inset-y-0 left-0 z-30 transform bg-white transition duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 grid place-content-between gap-10 p-8 sidebar"
       :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
     >
       <div class="flex items-center justify-between h-16 px-4 border-b">

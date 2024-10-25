@@ -250,9 +250,6 @@ const resendVerificationEmail = async () => {
       email: registerForm.emailR,
     });
 
-    console.log(res);
-    if (res.status !== 200) return;
-
     $toast.open({
       message: res.data.message,
       type: 'success',
@@ -283,7 +280,7 @@ const resendVerificationEmail = async () => {
 </script>
 
 <template>
-  <section class="w-screen h-screen register-container p-5">
+  <section class="w-screen h-screen register-container">
     <aside class="bg-slate-100 rounded grid place-content-between p-10">
       <div class="form-steps__information form-steps">
         <h1 class="text-4xl font-bold mb-14">Olympus GYM</h1>
@@ -558,7 +555,7 @@ const resendVerificationEmail = async () => {
             Antes de iniciar sesión, necesitarás validar tu correo electrónico.
           </p>
           <img
-            src="../../../assets/images/illustrations/undraw_mailbox_re_dvds.svg"
+            src="@/assets/images/illustrations/undraw_mailbox_re_dvds.svg"
             alt="Mailbox"
             class="size-56 mx-auto"
           />
@@ -626,9 +623,14 @@ const resendVerificationEmail = async () => {
 <style scoped>
 .register-container {
   display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: 1fr 3fr;
   column-gap: 2rem;
+}
+
+@media (min-width: 769px) {
+  .register-container {
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 3fr;
+  }
 }
 
 .form-steps {
@@ -662,6 +664,7 @@ const resendVerificationEmail = async () => {
 .form-container {
   display: grid;
   gap: 2.4rem;
+  margin-block: 4rem;
   min-width: 45rem;
   max-width: 50rem;
 }

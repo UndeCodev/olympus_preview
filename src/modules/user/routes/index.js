@@ -1,11 +1,13 @@
 import isAdminGuard from '@/modules/auth/guards/is-admin-guard';
 import UserLayoutPage from '../layouts/UserLayoutPage.vue';
+import isAuthenticatedGuard from '@/modules/auth/guards/is-authenticated.guard';
 
 export const profileRoutes = {
   path: '/perfil',
   name: 'profile-layout',
   redirect: { name: 'reset-password' },
   component: UserLayoutPage,
+  beforeEnter: [isAuthenticatedGuard],
   children: [
     {
       path: 'information',

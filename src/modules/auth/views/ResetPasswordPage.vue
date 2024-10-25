@@ -131,6 +131,7 @@ const onResetPassword = async () => {
     isSendingForm.value = false;
     router.replace({ name: 'inicio-sesion' });
   } catch (error) {
+    console.log(error);
     const errorMessage = error.response.data.message;
 
     $toast.open({

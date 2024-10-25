@@ -12,6 +12,11 @@ const authStore = useAuthStore();
     <RouterLink :to="{ name: 'products' }">Productos</RouterLink>
     <RouterLink :to="{ name: 'acerca-de' }">Acerca de</RouterLink>
     <RouterLink :to="{ name: 'contacto' }">Contacto</RouterLink>
+    <div class="ml-auto flex gap-10">
+      <RouterLink :to="{ name: 'politicas-de-privacidad' }">Política de privacidad</RouterLink>
+      <RouterLink :to="{ name: 'public-terminos-condiciones' }">Términos y condiciones</RouterLink>
+      <RouterLink :to="{ name: 'public-deslinde-legal' }">Deslinde legal</RouterLink>
+    </div>
     <div v-if="authStore.isAuthenticated" class="ml-auto flex gap-9">
       <RouterLink class="btn-profile" :to="{ name: 'profile-layout' }">{{
         authStore.username
@@ -24,7 +29,7 @@ const authStore = useAuthStore();
       </button>
     </div>
     <template v-else>
-      <RouterLink class="ml-auto btn btn-primary" :to="{ name: 'auth' }">Iniciar sesión</RouterLink>
+      <RouterLink class="btn btn-primary" :to="{ name: 'auth' }">Iniciar sesión</RouterLink>
     </template>
   </nav>
   <main class="container mx-auto">

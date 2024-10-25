@@ -32,5 +32,10 @@ export const authRoutes = {
       name: 'mfa-verification',
       component: () => import('@/modules/auth/views/MFAView.vue'),
     },
+    {
+      path: 'verificar-email',
+      name: 'verificar-email',
+      component: () => import('@/modules/auth/views/verifyEmailPage.vue'),
+    },
   ],
 };

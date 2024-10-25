@@ -27,5 +27,20 @@ export const landingRoutes = {
       name: 'contacto',
       component: () => import('@/modules/landing/views/ContactView.vue'),
     },
+    {
+      path: 'politicas-de-privacidad',
+      name: 'politicas-de-privacidad',
+      component: () => import('@/modules/landing/views/PrivacyTerms.vue'),
+    },
+    {
+      path: 'public-terminos-condiciones',
+      name: 'public-terminos-condiciones',
+      component: () => import('@/modules/landing/views/TermsAndConditions.vue'),
+    },
+    {
+      path: 'public-deslinde-legal',
+      name: 'public-deslinde-legal',
+      component: () => import('@/modules/landing/views/LegalDisclaimer.vue'),
+    },
   ],
 };

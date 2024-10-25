@@ -4,6 +4,7 @@ import useVuelidate from '@vuelidate/core';
 import { helpers, required, email } from '@vuelidate/validators';
 import { useToast } from 'vue-toast-notification';
 import olympusAPI from '@/api/olympusAPI';
+import { ArrowLeftIcon } from '@heroicons/vue/24/outline';
 
 // Properties
 const emailForm = ref('');
@@ -73,12 +74,14 @@ const onSendRecoveryPassword = async () => {
       @submit.prevent="onSendRecoveryPassword"
       v-if="isFormVisible"
     >
+      <RouterLink class="btn btn-outline place-self-start" :to="{ name: 'inicio-sesion' }">
+        <ArrowLeftIcon class="size-8" /> Regresar
+      </RouterLink>
       <div class="grid gap-4">
         <h1 class="text-4xl text-slate-800 font-semibold">Recuperar contraseña</h1>
         <p class="text-slate-700">
           Ingresa tu correo electrónico para que te enviemos las instrucciones de cómo restablecer
-          tu contraseña. Recibirás un enlace para crear una nueva contraseña que será válido por 15
-          minutos.
+          tu contraseña.
         </p>
       </div>
       <div class="form-group">

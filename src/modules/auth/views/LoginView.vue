@@ -8,7 +8,7 @@ import { useToast } from 'vue-toast-notification';
 // import { onMounted } from 'vue';
 import { CAPTCHA_SITE_KEY } from '@/utils/config';
 import router from '@/router';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { EyeIcon, EyeSlashIcon, HomeIcon } from '@heroicons/vue/24/outline';
 
 // Lifecycle
 onMounted(() => {
@@ -123,6 +123,12 @@ const onLogin = async () => {
 
 <template>
   <main class="container mx-auto h-screen grid content-center place-content-center">
+    <RouterLink
+      :to="{ name: 'inicio' }"
+      class="btn btn-outline place-self-start m-8 absolute inset-0 text-slate-800"
+    >
+      <HomeIcon class="size-8 text-slate-700" /> Ir al inicio
+    </RouterLink>
     <form @submit.prevent="onLogin" class="form bg-white rounded-md shadow-md p-6">
       <h1 class="text-center text-4xl">Iniciar sesión</h1>
       <div class="form-group grid gap-3">
