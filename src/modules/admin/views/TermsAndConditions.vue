@@ -116,18 +116,18 @@
         class="bg-white rounded-lg shadow-xl w-full md:w-9/12 lg:w-1/3 max-h-[80vh] lg:h-max-2/3"
       >
         <div class="p-6 space-y-6 h-full">
-          <h2 class="text-3xl font-bold text-gray-800 border-b pb-2">{{ selectedTerms.title }}</h2>
+          <h2 class="text-3xl font-bold text-gray-800 border-b pb-2">{{ selectedTerms.titulo }}</h2>
 
           <div class="space-y-4 grid place-content-between h-full grid-cols-1">
             <div class="w-full">
               <h3 class="text-lg font-semibold text-gray-700 mb-2">Contenido:</h3>
-              <p class="text-gray-600 bg-gray-50 p-4 rounded-md">{{ selectedTerms.content }}</p>
+              <p class="text-gray-600 bg-gray-50 p-4 rounded-md">{{ selectedTerms.contenido }}</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-20">
               <div class="bg-blue-50 p-3 rounded-md">
                 <p class="text-sm font-medium text-blue-800">Fecha de Vigencia</p>
-                <p class="text-lg text-blue-900">{{ formatDate(selectedTerms.effectiveDate) }}</p>
+                <p class="text-lg text-blue-900">{{ formatDate(selectedTerms.fecha_vigencia) }}</p>
               </div>
               <div class="bg-green-50 p-3 rounded-md">
                 <p class="text-sm font-medium text-green-800">Fecha de Creación</p>
@@ -223,7 +223,7 @@
               <input
                 v-model="isCurrentVersion"
                 type="radio"
-                value="true"
+                :value="true"
                 id="current-yes"
                 class="mr-2"
               />
@@ -231,7 +231,7 @@
               <input
                 v-model="isCurrentVersion"
                 type="radio"
-                value="false"
+                :value="false"
                 id="current-no"
                 class="mr-2"
               />
@@ -266,14 +266,14 @@
         <label>
           <input
             type="radio"
-            value="no vigente"
+            value="NO_VIGENTE"
             v-model="filterStatus"
             @change="applyTermsFilter"
           />
           No vigente
         </label>
         <label>
-          <input type="radio" value="eliminada" v-model="filterStatus" @change="applyTermsFilter" />
+          <input type="radio" value="ELIMINADA" v-model="filterStatus" @change="applyTermsFilter" />
           Eliminada
         </label>
       </div>
@@ -297,29 +297,29 @@
           v-for="term in filteredTerms"
           :key="term.id"
           class="hover:bg-gray-50"
-          :class="term.status === 'vigente' ? 'bg-gray-200' : ''"
+          :class="term.estado === 'VIGENTE' ? 'bg-gray-200' : ''"
         >
           <td class="py-2 px-4 border-b border-gray-200">
             {{ new Date(term.createdAt).toLocaleDateString() }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ term.version }}</td>
-          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ term.title }}</td>
-          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ term.content }}</td>
+          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ term.titulo }}</td>
+          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ term.contenido }}</td>
           <td class="py-2 px-4 border-b border-gray-200">
             <!-- Mostrar el estado -->
             <span
               :class="{
-                'bg-green text-green-600': term.status === 'vigente',
-                'text-yellow-600': term.status === 'no vigente',
-                'text-red-600': term.status === 'eliminada',
+                'bg-green text-green-600': term.estado === 'VIGENTE',
+                'text-yellow-600': term.estado === 'NO_VIGENTE',
+                'text-red-600': term.estado === 'ELIMINADA',
               }"
               class="capitalize"
             >
-              {{ term.status }}
+              {{ term.estado }}
             </span>
           </td>
           <td class="py-2 px-4 border-b border-gray-200">
-            {{ new Date(term.effectiveDate).toLocaleDateString() }}
+            {{ new Date(term.fecha_vigencia).toLocaleDateString() }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 max-w-xs">
             <button
@@ -331,16 +331,16 @@
             <button
               @click.prevent="editTerms(term)"
               class="text-blue-600 hover:text-blue-800 mr-2"
-              :class="{ 'opacity-50 cursor-not-allowed': term.status === 'eliminada' }"
-              :disabled="term.status === 'eliminada'"
+              :class="{ 'opacity-50 cursor-not-allowed': term.estado === 'ELIMINADA' }"
+              :disabled="term.estado === 'ELIMINADA'"
             >
               <PencilSquareIcon class="size-8" />
             </button>
             <button
               @click.prevent="deleteTerms(term.id)"
               class="text-red-600 hover:text-red-800"
-              :class="{ 'opacity-50 cursor-not-allowed': term.status === 'eliminada' }"
-              :disabled="term.status === 'eliminada'"
+              :class="{ 'opacity-50 cursor-not-allowed': term.estado === 'ELIMINADA' }"
+              :disabled="term.estado === 'ELIMINADA'"
             >
               <TrashIcon class="size-8" />
             </button>
@@ -420,9 +420,7 @@ const deleteTerms = async (policyId) => {
 
     isLoading.value = true;
     // Enviar la solicitud al backend para marcar como eliminada
-    const response = await olympusAPI.delete(`/dr/terms-and-conditions/${policyId}`, {
-      status: 'eliminada',
-    });
+    const response = await olympusAPI.delete(`/dr/terms-and-conditions/${policyId}`);
 
     // Mostrar mensaje de éxito o manejar la respuesta
     console.log('Política marcada como eliminada exitosamente:', response.data);
@@ -430,7 +428,7 @@ const deleteTerms = async (policyId) => {
     // Actualizar la lista local para reflejar los cambios
     const index = terms.value.findIndex((policy) => policy.id === policyId);
     if (index !== -1) {
-      terms.value[index].status = 'eliminada'; // Actualizar el estado localmente
+      terms.value[index].estado = 'ELIMINADA'; // Actualizar el estado localmente
     }
     isLoading.value = false;
   } catch (error) {
@@ -452,7 +450,7 @@ const updateTerms = async () => {
       title: termsTitle.value,
       content: termsContent.value,
       effectiveDate: termsEffectiveDate.value,
-      isCurrent: isCurrentVersion.value === 'true',
+      isCurrent: isCurrentVersion.value,
     };
 
     // Hacer la solicitud para actualizar los términos en el backend
@@ -491,16 +489,17 @@ const updateTerms = async () => {
 
 const editTerms = (term) => {
   selectedTerms.value = term;
-  termsTitle.value = term.title;
-  termsContent.value = term.content;
+  termsTitle.value = term.titulo;
+  termsContent.value = term.contenido;
 
   // Convertir la fecha a formato YYYY-MM-DD
-  const effectiveDateObject = new Date(term.effectiveDate);
+  const effectiveDateObject = new Date(term.fecha_vigencia);
   const year = effectiveDateObject.getFullYear();
   const month = String(effectiveDateObject.getMonth() + 1).padStart(2, '0'); // Meses van de 0 a 11, por eso se suma 1
   const day = String(effectiveDateObject.getDate()).padStart(2, '0');
   termsEffectiveDate.value = `${year}-${month}-${day}`;
 
+  isCurrentVersion.value = term.estado === 'VIGENTE';
   showEditModal.value = true; // Mostrar modal de edición
 };
 
@@ -548,8 +547,6 @@ const handleCreateTerms = async () => {
       effectiveDate: termsEffectiveDate.value,
     });
 
-    console.log(data);
-
     await fetchTerms();
     isLoading.value = false;
 
@@ -582,7 +579,7 @@ const filteredTerms = computed(() => {
   if (filterStatus.value === 'all') {
     return terms.value;
   }
-  return terms.value.filter((term) => term.status === filterStatus.value);
+  return terms.value.filter((term) => term.estado === filterStatus.value);
 });
 
 // Función para obtener los términos desde la API

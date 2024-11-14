@@ -31,7 +31,7 @@
       @click.self="closeModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white rounded-lg shadow-lg p-6 overflow-y-auto max-md:w-2/3 w-1/3">
+      <div class="bg-white rounded-lg shadow-lg p-6 overflow-y-auto max-md:w-2/3 w-1/2">
         <h2 class="text-2xl font-bold mb-4">Agregar Política de Privacidad</h2>
 
         <!-- Formulario de la política -->
@@ -172,7 +172,7 @@
               <input
                 v-model="isCurrentVersion"
                 type="radio"
-                value="true"
+                :value="true"
                 id="current-yes"
                 class="mr-2"
               />
@@ -180,7 +180,7 @@
               <input
                 v-model="isCurrentVersion"
                 type="radio"
-                value="false"
+                :value="false"
                 id="current-no"
                 class="mr-2"
               />
@@ -214,18 +214,20 @@
         class="bg-white rounded-lg shadow-xl w-full md:w-9/12 lg:w-1/2 max-h-[80vh] lg:h-max-2/3"
       >
         <div class="p-6 space-y-6 h-full">
-          <h2 class="text-3xl font-bold text-gray-800 border-b pb-2">{{ selectedPolicy.title }}</h2>
+          <h2 class="text-3xl font-bold text-gray-800 border-b pb-2">
+            {{ selectedPolicy.titulo }}
+          </h2>
 
           <div class="space-y-4 grid place-content-between h-full grid-cols-1">
             <div class="w-full">
               <h3 class="text-lg font-semibold text-gray-700 mb-2">Contenido:</h3>
-              <p class="text-gray-600 bg-gray-50 p-4 rounded-md">{{ selectedPolicy.content }}</p>
+              <p class="text-gray-600 bg-gray-50 p-4 rounded-md">{{ selectedPolicy.contenido }}</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-20">
               <div class="bg-blue-50 p-3 rounded-md">
                 <p class="text-sm font-medium text-blue-800">Fecha de Vigencia</p>
-                <p class="text-lg text-blue-900">{{ formatDate(selectedPolicy.effectiveDate) }}</p>
+                <p class="text-lg text-blue-900">{{ formatDate(selectedPolicy.fecha_vigencia) }}</p>
               </div>
               <div class="bg-green-50 p-3 rounded-md">
                 <p class="text-sm font-medium text-green-800">Fecha de Creación</p>
@@ -258,11 +260,11 @@
           Todos
         </label>
         <label>
-          <input type="radio" value="no vigente" v-model="filterStatus" @change="applyFilter" />
+          <input type="radio" value="NO_VIGENTE" v-model="filterStatus" @change="applyFilter" />
           No vigente
         </label>
         <label>
-          <input type="radio" value="eliminada" v-model="filterStatus" @change="applyFilter" />
+          <input type="radio" value="ELIMINADA" v-model="filterStatus" @change="applyFilter" />
           Eliminada
         </label>
       </div>
@@ -285,29 +287,31 @@
           v-for="policy in filteredPolicies"
           :key="policy.id"
           class="hover:bg-gray-50"
-          :class="policy.status === 'vigente' ? 'bg-gray-200' : ''"
+          :class="policy.estado === 'VIGENTE' ? 'bg-gray-200' : ''"
         >
           <td class="py-2 px-4 border-b border-gray-200">
             {{ new Date(policy.createdAt).toLocaleDateString() }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ policy.version }}</td>
-          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ policy.title }}</td>
-          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ policy.content }}</td>
+          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">{{ policy.titulo }}</td>
+          <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">
+            {{ policy.contenido }}
+          </td>
           <td class="py-2 px-4 border-b border-gray-200">
             <!-- Mostrar el estado -->
             <span
               :class="{
-                'bg-green text-green-600': policy.status === 'vigente',
-                'text-yellow-600': policy.status === 'no vigente',
-                'text-red-600': policy.status === 'eliminada',
+                'bg-green text-green-600': policy.estado === 'VIGENTE',
+                'text-yellow-600': policy.estado === 'NO_VIGENTE',
+                'text-red-600': policy.estado === 'ELIMINADA',
               }"
               class="capitalize"
             >
-              {{ policy.status }}
+              {{ policy.estado }}
             </span>
           </td>
           <td class="py-2 px-4 border-b border-gray-200">
-            {{ new Date(policy.effectiveDate).toLocaleDateString() }}
+            {{ new Date(policy.fecha_vigencia).toLocaleDateString() }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 max-w-xs">
             <button @click="openModalView(policy)" class="text-slate-600 hover:text-slate-800 mr-2">
@@ -316,16 +320,16 @@
             <button
               @click.prevent="editPolicy(policy)"
               class="text-blue-600 hover:text-blue-800 mr-2"
-              :class="{ 'opacity-50 cursor-not-allowed': policy.status === 'eliminada' }"
-              :disabled="policy.status === 'eliminada'"
+              :class="{ 'opacity-50 cursor-not-allowed': policy.estado === 'ELIMINADA' }"
+              :disabled="policy.estado === 'ELIMINADA'"
             >
               <PencilSquareIcon class="size-8" />
             </button>
             <button
               @click.prevent="deletePrivacyPolicy(policy.id)"
               class="text-red-600 hover:text-red-800"
-              :class="{ 'opacity-50 cursor-not-allowed': policy.status === 'eliminada' }"
-              :disabled="policy.status === 'eliminada'"
+              :class="{ 'opacity-50 cursor-not-allowed': policy.estado === 'ELIMINADA' }"
+              :disabled="policy.estado === 'ELIMINADA'"
             >
               <TrashIcon class="size-8" />
             </button>
@@ -378,10 +382,13 @@ const showModalView = ref(false);
 // Datos de ejemplo para las políticas de privacidad
 const policies = ref([]);
 
+const alphaWithSpaces = helpers.regex(/^[a-zA-ZáéíóúüÁÉÍÓÚñÑ\s]+$/);
+
 const formRules = {
   title: {
     $autoDirty: true,
     required: helpers.withMessage('Este campo es obligatorio', required),
+    alphaWithSpaces: helpers.withMessage('El título solo debe de contener letras', alphaWithSpaces),
   },
   content: {
     $autoDirty: true,
@@ -408,7 +415,7 @@ const filteredPolicies = computed(() => {
   if (filterStatus.value === 'all') {
     return policies.value;
   }
-  return policies.value.filter((policy) => policy.status === filterStatus.value);
+  return policies.value.filter((policy) => policy.estado === filterStatus.value);
 });
 
 // Función para cerrar el modal
@@ -448,9 +455,7 @@ const deletePrivacyPolicy = async (policyId) => {
 
     isLoading.value = true;
     // Enviar la solicitud al backend para marcar como eliminada
-    const response = await olympusAPI.delete(`/dr/privacy-policy/${policyId}`, {
-      status: 'eliminada',
-    });
+    const response = await olympusAPI.delete(`/dr/privacy-policy/${policyId}`);
 
     // Mostrar mensaje de éxito o manejar la respuesta
     console.log('Política marcada como eliminada exitosamente:', response.data);
@@ -458,7 +463,7 @@ const deletePrivacyPolicy = async (policyId) => {
     // Actualizar la lista local para reflejar los cambios
     const index = policies.value.findIndex((policy) => policy.id === policyId);
     if (index !== -1) {
-      policies.value[index].status = 'eliminada'; // Actualizar el estado localmente
+      policies.value[index].estado = 'ELIMINADA'; // Actualizar el estado localmente
     }
     isLoading.value = false;
   } catch (error) {
@@ -533,6 +538,7 @@ const editPrivacyPolicy = async (policyId, updatedData) => {
   try {
     // Validar que todos los campos necesarios estén presentes
     const { title, content, effectiveDate, isCurrent } = updatedData;
+
     if (!title || !content || !effectiveDate || !policyId) {
       throw new Error('Todos los campos son obligatorios.');
     }
@@ -572,7 +578,7 @@ const updatePolicy = async () => {
       title: title.value,
       content: content.value,
       effectiveDate: effectiveDate.value,
-      isCurrent: isCurrentVersion.value === 'true',
+      isCurrent: isCurrentVersion.value,
     };
 
     // Hacer la solicitud para actualizar la política en el backend
@@ -584,8 +590,8 @@ const updatePolicy = async () => {
       policies.value[index] = updatedPolicy.data; // Usar los datos actualizados del backend
     }
     // Cerrar el modal después de actualizar
-    await fetchPrivacyPolicies();
     closeEditModal();
+    await fetchPrivacyPolicies();
     $toast.open({
       message: updatedPolicy.message,
       type: 'success',
@@ -608,17 +614,17 @@ const updatePolicy = async () => {
 
 const editPolicy = (policy) => {
   selectedPolicy.value = policy;
-  title.value = policy.title;
-  content.value = policy.content;
+  title.value = policy.titulo;
+  content.value = policy.contenido;
 
   // Convertir la fecha a formato YYYY-MM-DD
-  const effectiveDateObject = new Date(policy.effectiveDate);
+  const effectiveDateObject = new Date(policy.fecha_vigencia);
   const year = effectiveDateObject.getFullYear();
   const month = String(effectiveDateObject.getMonth() + 1).padStart(2, '0'); // Meses van de 0 a 11, por eso se suma 1
   const day = String(effectiveDateObject.getDate()).padStart(2, '0');
   effectiveDate.value = `${year}-${month}-${day}`;
 
-  isCurrentVersion.value = policy.status === 'vigente';
+  isCurrentVersion.value = policy.estado === 'VIGENTE';
   showEditModal.value = true; // Mostrar modal de edición
 };
 
@@ -628,6 +634,8 @@ const fetchPrivacyPolicies = async () => {
     policies.value = [];
 
     const response = await olympusAPI.get('/dr/privacy-policies');
+
+    console.log(response.data);
 
     policies.value = response.data;
     isLoadingData.value = false;

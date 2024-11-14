@@ -26,10 +26,10 @@ authStore.$subscribe(
 const fetchDataWebsite = async () => {
   try {
     const { data } = await olympusAPI.get('/settings/company-profile');
-    const { thumbnail_logo_url, page_title } = data;
+    const { logo_min_url, titulo_sitio } = data;
 
-    link.href = thumbnail_logo_url;
-    document.title = page_title ?? 'Olympus GYM';
+    link.href = logo_min_url;
+    document.title = titulo_sitio ?? 'Olympus GYM';
   } catch (error) {
     console.log(error);
   }

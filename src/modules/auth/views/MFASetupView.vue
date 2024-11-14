@@ -5,6 +5,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToast } from 'vue-toast-notification';
 import { ShieldCheckIcon } from '@heroicons/vue/24/outline';
+import { MFA_SECRET } from '@/utils/config';
 
 // Store
 const authStore = useAuthStore();
@@ -13,7 +14,6 @@ const authStore = useAuthStore();
 const isLoadingData = ref(false);
 
 const qrCode = ref('');
-const secret = ref('');
 
 const digits = ref(['', '', '', '', '', '']); // Array para los 6 dígitos
 
@@ -30,10 +30,9 @@ const setupMFA = async () => {
   try {
     isLoadingData.value = true;
 
-    const response = await olympusAPI.post('/auth/mfa/setup', { email: authStore.email });
+    const { data } = await olympusAPI.post('/auth/mfa/setup', { email: authStore.email });
 
-    qrCode.value = response.data.qrCode;
-    secret.value = response.data.secret;
+    qrCode.value = data.qrCode;
 
     isLoadingData.value = false;
   } catch (error) {
@@ -46,9 +45,10 @@ const verifyMFA = async () => {
   if (!verificationCode.value.length) return;
 
   try {
+    console.log({ MFA_SECRET });
     await olympusAPI.post('/auth/mfa/verify', {
       token: verificationCode.value,
-      secret: secret.value,
+      secret: MFA_SECRET,
     });
 
     await onEnableMFA();
@@ -67,7 +67,7 @@ const verifyMFA = async () => {
 
 const onEnableMFA = async () => {
   try {
-    await olympusAPI.put('/auth/mfa/enable', { userId: authStore.userId, mfaState: true });
+    await olympusAPI.put('/auth/mfa/enable', { email: authStore.email, mfaState: true });
 
     $toast.open({
       message: 'Enhorabuena, configuraste correctamente la seguridad de dos pasos! 🎉🎉🎉',
@@ -93,7 +93,7 @@ const onDisableMFA = async () => {
   if (!confirmed) return;
 
   try {
-    await olympusAPI.put('/auth/mfa/enable', { userId: authStore.userId, mfaState: false });
+    await olympusAPI.put('/auth/mfa/enable', { email: authStore.email, mfaState: false });
 
     $toast.open({
       message: 'Se ha desactivado correctamente la autenticación de dos pasos de tu cuenta.',

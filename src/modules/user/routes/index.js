@@ -63,6 +63,12 @@ export const profileRoutes = {
       ],
     },
     {
+      path: 'configuracion-emails',
+      name: 'configuracion-emails',
+      beforeEnter: isAdminGuard,
+      component: () => import('@/modules/admin/views/ConfigEmailsView.vue'),
+    },
+    {
       path: 'mfa-setup',
       name: 'mfa-setup',
       component: () => import('@/modules/auth/views/MFASetupView.vue'),

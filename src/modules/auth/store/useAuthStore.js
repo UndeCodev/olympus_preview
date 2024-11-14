@@ -17,6 +17,12 @@ export const useAuthStore = defineStore('auth', () => {
     Checking: 'Checking',
   };
 
+  const roles = {
+    1: 'Admin',
+    2: 'Staff',
+    3: 'User',
+  };
+
   const authStatus = ref(AuthStatus.UnAuthenticated);
 
   const logout = () => {
@@ -89,11 +95,18 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const register = async (user) => {
-    const { name, lastname, emailR, phone, password } = user;
+    const { firstname, lastname, phone, birthdate, emailR, password } = user;
 
     try {
       authStatus.value = AuthStatus.Checking;
-      const registerResp = await registerAction({ name, lastname, email: emailR, phone, password });
+      const registerResp = await registerAction({
+        firstname,
+        lastname,
+        email: emailR,
+        birthdate,
+        phone,
+        password,
+      });
 
       if (!registerResp.ok) {
         logout();
@@ -126,7 +139,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     hasMFA: computed(() => user.value.hasMFA),
 
-    isAdmin: computed(() => user.value.rol === 'admin'),
+    isAdmin: computed(() => roles[user.value.rol] === 'Admin'),
 
     userId: computed(() => user.value?.id),
     username: computed(() => `${user.value?.nombre} ${user.value?.apellidos}` ?? 'Usuario'),

@@ -24,10 +24,11 @@ const privacy = reactive({
 const fetchData = async () => {
   try {
     const { data } = await olympusAPI.get('/dr/term-and-condition');
-    const { title, content, effectiveDate } = data;
-    privacy.title = title;
-    privacy.content = content;
-    privacy.effectiveDate = effectiveDate;
+    const { titulo, contenido, fecha_vigencia } = data;
+
+    privacy.title = titulo;
+    privacy.content = contenido;
+    privacy.effectiveDate = fecha_vigencia;
   } catch (error) {
     console.log(error);
   }

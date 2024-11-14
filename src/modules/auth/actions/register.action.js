@@ -1,21 +1,28 @@
 import olympusAPI from '@/api/olympusAPI';
 
-export const registerAction = async ({ name, lastname, email, phone, password }) => {
+export const registerAction = async ({
+  firstname,
+  lastname,
+  phone,
+  birthdate,
+  email,
+  password,
+}) => {
   try {
-    const { data } = await olympusAPI.post('/auth/register', {
-      name,
+    await olympusAPI.post('/auth/register', {
+      firstname,
       lastname,
-      email,
       phone,
+      birthdate,
+      email,
       password,
     });
 
     return {
       ok: true,
-      user: data.user,
-      token: data.token,
     };
   } catch (error) {
+    console.log(error);
     const errorMessage = error.response.data.message;
 
     return {

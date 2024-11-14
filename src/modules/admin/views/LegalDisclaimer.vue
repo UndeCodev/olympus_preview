@@ -278,7 +278,7 @@
         <label>
           <input
             type="radio"
-            value="no vigente"
+            value="NO_VIGENTE"
             v-model="filterStatus"
             @change="applyDisclaimerFilter"
           />
@@ -287,7 +287,7 @@
         <label>
           <input
             type="radio"
-            value="eliminada"
+            value="ELIMINADA"
             v-model="filterStatus"
             @change="applyDisclaimerFilter"
           />
@@ -314,7 +314,7 @@
           v-for="disclaimer in filteredDisclaimers"
           :key="disclaimer.id"
           class="hover:bg-gray-50"
-          :class="disclaimer.status === 'vigente' ? 'bg-gray-200' : ''"
+          :class="disclaimer.estado === 'VIGENTE' ? 'bg-gray-200' : ''"
         >
           <td class="py-2 px-4 border-b border-gray-200">
             {{ new Date(disclaimer.createdAt).toLocaleDateString() }}
@@ -323,26 +323,26 @@
             {{ disclaimer.version }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">
-            {{ disclaimer.title }}
+            {{ disclaimer.titulo }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 truncate max-w-xs">
-            {{ disclaimer.content }}
+            {{ disclaimer.contenido }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200">
             <!-- Mostrar el estado -->
             <span
               :class="{
-                'bg-green text-green-600': disclaimer.status === 'vigente',
-                'text-yellow-600': disclaimer.status === 'no vigente',
-                'text-red-600': disclaimer.status === 'eliminada',
+                'bg-green text-green-600': disclaimer.estado === 'VIGENTE',
+                'text-yellow-600': disclaimer.estado === 'NO_VIGENTE',
+                'text-red-600': disclaimer.estado === 'ELIMINADA',
               }"
               class="capitalize"
             >
-              {{ disclaimer.status }}
+              {{ disclaimer.estado }}
             </span>
           </td>
           <td class="py-2 px-4 border-b border-gray-200">
-            {{ new Date(disclaimer.effectiveDate).toLocaleDateString() }}
+            {{ new Date(disclaimer.fecha_vigencia).toLocaleDateString() }}
           </td>
           <td class="py-2 px-4 border-b border-gray-200 max-w-xs">
             <button
@@ -354,16 +354,16 @@
             <button
               @click.prevent="editDisclaimer(disclaimer)"
               class="text-blue-600 hover:text-blue-800 mr-2"
-              :class="{ 'opacity-50 cursor-not-allowed': disclaimer.status === 'eliminada' }"
-              :disabled="disclaimer.status === 'eliminada'"
+              :class="{ 'opacity-50 cursor-not-allowed': disclaimer.estado === 'ELIMINADA' }"
+              :disabled="disclaimer.estado === 'ELIMINADA'"
             >
               <PencilSquareIcon class="size-8" />
             </button>
             <button
               @click.prevent="deleteDisclaimer(disclaimer.id)"
               class="text-red-600 hover:text-red-800"
-              :class="{ 'opacity-50 cursor-not-allowed': disclaimer.status === 'eliminada' }"
-              :disabled="disclaimer.status === 'eliminada'"
+              :class="{ 'opacity-50 cursor-not-allowed': disclaimer.estado === 'ELIMINADA' }"
+              :disabled="disclaimer.estado === 'ELIMINADA'"
             >
               <TrashIcon class="size-8" />
             </button>
@@ -443,9 +443,7 @@ const deleteDisclaimer = async (disclaimerId) => {
 
     isLoading.value = true;
     // Enviar la solicitud al backend para marcar como eliminado
-    const response = await olympusAPI.delete(`/dr/legal-disclaimer/${disclaimerId}`, {
-      status: 'eliminada',
-    });
+    const response = await olympusAPI.delete(`/dr/legal-disclaimer/${disclaimerId}`);
 
     // Mostrar mensaje de éxito o manejar la respuesta
     console.log('Descargo marcado como eliminado exitosamente:', response.data);
@@ -453,7 +451,7 @@ const deleteDisclaimer = async (disclaimerId) => {
     // Actualizar la lista local para reflejar los cambios
     const index = disclaimers.value.findIndex((disclaimer) => disclaimer.id === disclaimerId);
     if (index !== -1) {
-      disclaimers.value[index].status = 'eliminada'; // Actualizar el estado localmente
+      disclaimers.value[index].estado = 'ELIMINADA'; // Actualizar el estado localmente
     }
     isLoading.value = false;
   } catch (error) {
@@ -475,7 +473,7 @@ const updateDisclaimer = async () => {
       title: disclaimerTitle.value,
       content: disclaimerContent.value,
       effectiveDate: disclaimerEffectiveDate.value,
-      isCurrent: isCurrentVersion.value === 'true',
+      isCurrent: isCurrentVersion.value,
     };
 
     // Hacer la solicitud para actualizar el descargo en el backend
@@ -513,16 +511,17 @@ const updateDisclaimer = async () => {
 
 const editDisclaimer = (disclaimer) => {
   selectedDisclaimer.value = disclaimer;
-  disclaimerTitle.value = disclaimer.title;
-  disclaimerContent.value = disclaimer.content;
+  disclaimerTitle.value = disclaimer.titulo;
+  disclaimerContent.value = disclaimer.contenido;
 
   // Convertir la fecha a formato YYYY-MM-DD
-  const effectiveDateObject = new Date(disclaimer.effectiveDate);
+  const effectiveDateObject = new Date(disclaimer.fecha_vigencia);
   const year = effectiveDateObject.getFullYear();
   const month = String(effectiveDateObject.getMonth() + 1).padStart(2, '0'); // Meses van de 0 a 11, por eso se suma 1
   const day = String(effectiveDateObject.getDate()).padStart(2, '0');
   disclaimerEffectiveDate.value = `${year}-${month}-${day}`;
 
+  isCurrentVersion.value = disclaimer.estado === 'VIGENTE';
   showEditModal.value = true; // Mostrar modal de edición
 };
 
@@ -570,8 +569,6 @@ const handleCreateDisclaimer = async () => {
       effectiveDate: disclaimerEffectiveDate.value,
     });
 
-    console.log(data);
-
     await fetchDisclaimers();
     isLoading.value = false;
 
@@ -604,7 +601,7 @@ const filteredDisclaimers = computed(() => {
   if (filterStatus.value === 'all') {
     return disclaimers.value;
   }
-  return disclaimers.value.filter((disclaimer) => disclaimer.status === filterStatus.value);
+  return disclaimers.value.filter((disclaimer) => disclaimer.estado === filterStatus.value);
 });
 
 // Función para obtener los descargos desde la API

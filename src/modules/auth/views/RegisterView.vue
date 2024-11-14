@@ -42,7 +42,7 @@ const isTooYoung = computed(() => {
 
 // Vuelidate rules
 const registerRules = {
-  name: {
+  firstname: {
     $autoDirty: true,
     required: helpers.withMessage('Este campo es obligatorio', required),
     alphaWithSpaces: helpers.withMessage('Solo se permiten letras', alphaWithSpaces),
@@ -88,16 +88,14 @@ const registerRules = {
 
 // Properties
 const registerForm = reactive({
-  emailR: '',
-  name: '',
-  lastname: '',
-  phone: '',
+  emailR: 'coniwa9003@operades.com',
+  firstname: 'Jane',
+  lastname: 'Doe',
+  phone: '7713400653',
   birthdate: '',
-  password: '',
-  repeatPassword: '',
+  password: 'Masterv1@123',
+  repeatPassword: 'Masterv1@123',
 });
-
-// const formattedPhoneNumber = ref(''); // Variable para mostrar el número de teléfono con formato
 
 const isPasswordVisible = ref(false);
 const isPasswordConfirmVisible = ref(false);
@@ -115,12 +113,13 @@ const strengthPercent = ref(0);
 const currentDate = new Date();
 const currentStep = ref(1);
 
+const isLoadingData = ref(false);
+
 // Instances
 const v$ = useVuelidate(registerRules, registerForm);
 const $toast = useToast();
 
 // Methods
-
 const checkPasswordStrength = () => {
   const pass = registerForm.password;
 
@@ -154,17 +153,6 @@ const checkPassword = async () => {
   }
 };
 
-// Bug with the v-model
-
-// const formatPhoneNumber = () => {
-//   // Aplica el formato: XXX-XXX-XXXX
-//   if (registerForm.phone.length > 0) {
-//     formattedPhoneNumber.value = registerForm.phone
-//       .replace(/(\d{3})(\d{3})(\d{0,4})/, '$1-$2-$3')
-//       .replace(/-$/, ''); // Evita un guión al final si está incompleto
-//   }
-// };
-
 const maxDate = computed(() => {
   const year = currentDate.getFullYear() - 16;
   const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -192,7 +180,7 @@ const prevStep = () => {
 
 const checkFields = () => {
   if (currentStep.value === 1) {
-    v$.value.name.$touch();
+    v$.value.firstname.$touch();
     v$.value.lastname.$touch();
     v$.value.phone.$touch();
     v$.value.birthdate.$touch();
@@ -235,17 +223,13 @@ const onRegister = async () => {
     pauseOnHover: true,
   });
 
-  $toast.open({
-    message: 'Ahora un último paso antes de iniciar sesión...',
-    type: 'info',
-    duration: 5000,
-    pauseOnHover: true,
-  });
   currentStep.value = 4;
 };
 
 const resendVerificationEmail = async () => {
   try {
+    isLoadingData.value = true;
+
     const res = await olympusAPI.post('/auth/resend-verification-email', {
       email: registerForm.emailR,
     });
@@ -256,7 +240,11 @@ const resendVerificationEmail = async () => {
       duration: 4000,
       pauseOnHover: true,
     });
+
+    isLoadingData.value = false;
   } catch (error) {
+    isLoadingData.value = false;
+
     if (error.status === 400) {
       $toast.open({
         message: error.response.data?.message,
@@ -366,17 +354,17 @@ const resendVerificationEmail = async () => {
           </div>
           <div class="form-group--fullname">
             <div class="form-group grid">
-              <label for="name">Nombre</label>
+              <label for="firstname">Nombre</label>
               <input
                 type="text"
                 placeholder="Jane"
                 class="form-control"
-                :class="{ 'form-control--error': v$.name.$error }"
-                id="name"
-                v-model.trim="registerForm.name"
+                :class="{ 'form-control--error': v$.firstname.$error }"
+                id="firstname"
+                v-model.trim="registerForm.firstname"
               />
-              <span v-if="v$.name.$error">
-                <p v-for="error of v$.name.$errors" :key="error.$uid" class="text-error">
+              <span v-if="v$.firstname.$error">
+                <p v-for="error of v$.firstname.$errors" :key="error.$uid" class="text-error">
                   {{ error.$message }}
                 </p>
               </span>
@@ -444,7 +432,7 @@ const resendVerificationEmail = async () => {
           <div class="form-group grid gap-3">
             <label for="email">Correo electrónico:</label>
             <input
-              type="text"
+              type="email"
               placeholder="janedoe@outlook.com"
               class="form-control"
               :class="{ 'form-control--error': v$.emailR.$error }"
@@ -466,6 +454,7 @@ const resendVerificationEmail = async () => {
                 placeholder="**********"
                 class="form-control"
                 :class="{ 'form-control--error': v$.password.$error || passwordStatus }"
+                autocomplete="new-password"
                 v-model="registerForm.password"
                 @input="checkPasswordStrength"
                 @blur="checkPassword"
@@ -517,6 +506,7 @@ const resendVerificationEmail = async () => {
                 placeholder="**********"
                 class="form-control"
                 :class="{ 'form-control--error': v$.repeatPassword.$error }"
+                autocomplete="new-password"
                 id="repeat-password"
                 v-model="registerForm.repeatPassword"
               />
@@ -541,7 +531,7 @@ const resendVerificationEmail = async () => {
           <h2 class="text-4xl font-semibold">Confirmación</h2>
           <p class="text-3xl">Revise los detalles proporcionados antes de completar el registro.</p>
           <ul>
-            <li>Nombre: {{ registerForm.name }}</li>
+            <li>Nombre: {{ registerForm.firstname }}</li>
             <li>Apellidos: {{ registerForm.lastname }}</li>
             <li>Teléfono: {{ registerForm.phone }}</li>
             <li>Fecha de nacimiento: {{ registerForm.birthdate }}</li>
@@ -566,7 +556,7 @@ const resendVerificationEmail = async () => {
           </p>
           <p class="text-center">Si no recibiste ningún correo, da clic en reenviar código.</p>
           <button type="button" class="btn btn-primary" @click="resendVerificationEmail">
-            <span v-if="!authStore.isChecking">Reenviar correo de confirmación</span>
+            <span v-if="!isLoadingData">Reenviar correo de confirmación</span>
             <div v-else class="sk-chase w-8 h-8 mx-auto">
               <div class="sk-chase-dot"></div>
               <div class="sk-chase-dot"></div>
@@ -597,7 +587,7 @@ const resendVerificationEmail = async () => {
             class="btn btn-primary grid grid-flow-col place-content-center place-items-end gap-4"
             v-show="currentStep < 3"
           >
-            Siguiente
+            Siguiente paso
           </button>
           <button
             type="submit"

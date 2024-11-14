@@ -23,13 +23,16 @@
         </div>
       </div>
       <label for="logo" class="block text-gray-700 mb-1">Selecciona tu logo</label>
-      <input
-        id="logo"
-        type="file"
-        accept="image/jpeg,image/png"
-        @change="handleLogoUpload"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-      />
+      <div class="grid grid-flow-col gap-4">
+        <input
+          id="logo"
+          type="file"
+          accept="image/jpeg,image/png"
+          @change="handleLogoUpload"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <button class="btn btn-primary" @click="btnCancelLogoUpload">Cancelar</button>
+      </div>
       <p v-if="logoError" class="text-red-500 mt-1">{{ logoError }}</p>
     </div>
 
@@ -76,7 +79,7 @@
 
       <!-- Dirección -->
       <div class="mb-4">
-        <label for="address" class="block text-gray-700 mb-1">Dirección</label>
+        <label for="address" class="block text-gray-700 mb-1">Dirección:</label>
         <input
           id="address"
           v-model.trim="companyForm.address.address"
@@ -254,7 +257,7 @@
     <button
       @click="updateCompanyProfile"
       class="w-full btn btn-primary disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:text-white"
-      :disabled="v$.$invalid"
+      :disabled="v$.$invalid || logoError.length"
     >
       <span v-if="!isSendingData">Guardar cambios</span>
       <div v-else class="sk-chase w-8 h-8 mx-auto">
@@ -370,6 +373,8 @@ const formRules = {
 const logoError = ref('');
 const logoPreview = ref('');
 
+const actualLogo = ref('');
+
 const companyForm = reactive({
   id: '',
   logoFile: '',
@@ -397,23 +402,28 @@ const $toast = useToast();
 
 const handleLogoUpload = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      logoError.value = 'El tamaño del archivo no debe exceder 2MB';
-      companyForm.logoFile = '';
-    } else if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      logoError.value = 'El archivo debe ser JPEG o PNG';
-      companyForm.logoFile = '';
-    } else {
-      logoError.value = '';
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        companyForm.logoFile = file;
-        logoPreview.value = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+
+  if (file && file.size > 2 * 1024 * 1024) {
+    logoError.value = 'El tamaño del archivo no debe exceder 2MB';
+    companyForm.logoFile = '';
+  } else if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    logoError.value = 'El archivo debe ser JPEG o PNG';
+    companyForm.logoFile = '';
+  } else {
+    logoError.value = '';
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      companyForm.logoFile = file;
+      logoPreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
+};
+
+const btnCancelLogoUpload = () => {
+  logoPreview.value = actualLogo.value;
+  companyForm.logoFile = '';
+  logoError.value = '';
 };
 
 watch(
@@ -427,7 +437,6 @@ const pageTitleCharCount = computed(() => companyForm.pageTitle.length);
 const sloganCharCount = computed(() => companyForm.slogan.length);
 
 const addSocialMedia = () => {
-  console.log(v$.value.socialMedia);
   companyForm.socialMedia.push({ social_name: '', social_url: '' });
 };
 
@@ -440,7 +449,7 @@ const removeSocialMedia = (index) => {
 const updateCompanyProfile = async () => {
   v$.value.$touch();
 
-  if (v$.value.$invalid) return;
+  if (v$.value.$invalid || logoError.value) return;
 
   const formData = new FormData();
 
@@ -501,19 +510,25 @@ const fetchCompanyProfile = async () => {
 
     // Rellenar los campos del formulario con los datos obtenidos
     logoPreview.value = data.logo_url;
+    actualLogo.value = data.logo_url;
 
     companyForm.id = data.id;
-    companyForm.pageTitle = data.page_title;
-    companyForm.slogan = data.slogan;
-    companyForm.address.address = data.address;
-    companyForm.address.city = data.city;
-    companyForm.address.state = data.state;
-    companyForm.address.postalCode = data.postal_code;
+    companyForm.pageTitle = data.titulo_sitio;
+    companyForm.slogan = data.eslogan;
+    companyForm.phone = parseInt(data.numero_contacto);
     companyForm.emailContact = data.email;
-    companyForm.phone = parseInt(data.phone_number);
+    companyForm.address.address = data.direccion.address;
+    companyForm.address.city = data.direccion.city;
+    companyForm.address.state = data.direccion.state;
+    companyForm.address.postalCode = data.direccion.postalCode;
 
     // Rellenar las redes sociales
-    companyForm.socialMedia = data.social || [];
+    companyForm.socialMedia = data.redes_sociales || [
+      {
+        social_name: '',
+        social_url: '',
+      },
+    ];
 
     isLoading.value = false;
   } catch (error) {

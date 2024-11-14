@@ -78,6 +78,7 @@ import {
   ArrowLeftIcon,
   DocumentTextIcon,
   AdjustmentsHorizontalIcon,
+  EnvelopeIcon,
 } from '@heroicons/vue/24/outline';
 import router from '@/router';
 
@@ -93,6 +94,7 @@ const defaultItems = [
 const adminItems = [
   { name: 'Configuración del sitio', icon: AdjustmentsHorizontalIcon, path: 'perfil-empresa' },
   { name: 'Documentos legales', icon: DocumentTextIcon, path: 'documentos-legales' },
+  { name: 'Configurar correos', icon: EnvelopeIcon, path: 'configuracion-emails' },
 ];
 
 // Store

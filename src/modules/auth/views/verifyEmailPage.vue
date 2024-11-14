@@ -39,7 +39,7 @@
             El token proporcionado es inválido o caducó, intenta reenviar un nuevo enlace
           </p>
         </div>
-        <div class="flex place-content-center gap-4 mt-6">
+        <div class="grid grid-flow-col gap-4 mt-6">
           <RouterLink :to="{ name: 'inicio' }" class="btn btn-outline">
             <ArrowLeftIcon class="size-8" /> Ir al inicio
           </RouterLink>
@@ -81,8 +81,8 @@ import { useToast } from 'vue-toast-notification';
 const route = useRoute();
 const $toast = useToast();
 
-const token = route.query?.token;
-const email = route.query?.email;
+const token = ref('');
+const email = ref('');
 
 const ok = ref(false);
 
@@ -91,7 +91,13 @@ const isSendingData = ref(false);
 
 const resendVerificationEmail = async () => {
   try {
-    const { data } = await olympusAPI.post('/auth/resend-verification-email', { email });
+    isSendingData.value = true;
+
+    const { data } = await olympusAPI.post('/auth/resend-verification-email', {
+      email: email.value,
+    });
+
+    isSendingData.value = false;
 
     $toast.open({
       message: data.message,
@@ -100,6 +106,7 @@ const resendVerificationEmail = async () => {
       pauseOnHover: true,
     });
   } catch (error) {
+    isSendingData.value = false;
     const errorMessage = error.response.data.message;
 
     if (error.response.data.isEmailVerified) {
@@ -127,27 +134,37 @@ const resendVerificationEmail = async () => {
 const verifyToken = async () => {
   try {
     isLoadingData.value = true;
-    await olympusAPI.put('/auth/verify-email', { token: token });
+
+    await olympusAPI.put('/auth/verify-email', { token: token.value });
 
     ok.value = true;
 
     $toast.open({
-      message: 'Bienvenido! Nos da gusto que seas parte de nuestro equipo',
+      message: 'Ahora puedes iniciar sesión',
       type: 'success',
       duration: 4000,
       pauseOnHover: true,
     });
 
-    $toast.open({
-      message: 'Ahora pudees iniciar sesión',
-      type: 'info',
-      duration: 4000,
-      pauseOnHover: true,
-    });
     isLoadingData.value = false;
   } catch (error) {
+    const { message: errorMessage, isEmailVerified } = error.response.data;
+
     isLoadingData.value = false;
     ok.value = false;
+
+    if (isEmailVerified) {
+      router.replace({ name: 'inicio-sesion' });
+
+      $toast.open({
+        message: errorMessage,
+        type: 'info',
+        duration: 4000,
+        pauseOnHover: true,
+      });
+
+      return;
+    }
   }
 };
 
@@ -156,7 +173,12 @@ const login = () => {
 };
 
 onBeforeMount(async () => {
-  if (!token || !email) return router.replace({ name: 'inicio' });
+  token.value = route.query?.token;
+  email.value = route.query?.email;
+
+  if (!token.value) return router.replace({ name: 'inicio' });
+  console.log(token.value);
+  console.log(email.value);
 
   await verifyToken();
 });

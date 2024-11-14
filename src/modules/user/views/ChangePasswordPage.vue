@@ -21,6 +21,8 @@ const getInitialFormData = () => ({
   confirmNewPassord: '',
 });
 
+const isSendingData = ref(false);
+
 const newPasswordForm = reactive(getInitialFormData());
 
 const isInputVisible = reactive({
@@ -40,7 +42,6 @@ const passwordStatus = ref('');
 const strengthPercent = ref(0);
 
 // Rules for vuelidate
-// TODO: Verify why $autoDirty isn't working
 const newPasswordRules = {
   oldPassword: {
     $autoDirty: true,
@@ -108,7 +109,7 @@ const checkPassword = async () => {
   }
 };
 
-const onNewPassword = async (event) => {
+const onNewPassword = async () => {
   v$.value.$touch();
   if (v$.value.$invalid) return;
 
@@ -129,13 +130,14 @@ const onNewPassword = async (event) => {
   inputOldPassword.value.classList.remove('form-control--error');
 
   try {
-    const { status, data } = await olympusAPI.put('/auth/change-password', {
+    isSendingData.value = true;
+    const { data } = await olympusAPI.put('/auth/change-password', {
       email: authStore.email,
       oldPassword: newPasswordForm.oldPassword,
       newPassword: newPasswordForm.newPassword,
     });
 
-    if (status !== 200) return;
+    isSendingData.value = false;
 
     $toast.open({
       message: data.message,
@@ -144,9 +146,10 @@ const onNewPassword = async (event) => {
       pauseOnHover: true,
     });
 
-    event.target.reset();
     Object.assign(newPasswordForm, getInitialFormData());
+    v$.value.$reset();
   } catch (error) {
+    isSendingData.value = false;
     const errorMessage = error.response.data.message;
 
     $toast.open({
@@ -297,7 +300,15 @@ const onNewPassword = async (event) => {
         :class="{ 'btn-primary--disabled': v$.$invalid }"
         :disabled="v$.$invalid"
       >
-        Cambiar contraseña
+        <span v-if="!isSendingData">Cambiar contraseña</span>
+        <div v-else class="sk-chase w-8 h-8 mx-auto">
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+        </div>
       </button>
     </form>
   </div>
